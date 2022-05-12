@@ -1,1 +1,4 @@
 /.idea/
+/storage/mysql_master/
+/storage/mysql_slave/
+/.env
