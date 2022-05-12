@@ -1,0 +1,82 @@
+version: '3.6'
+
+services:
+
+  mysql:
+    image: haproxy:2.5.6
+    hostname: mysql
+    restart: always
+    depends_on:
+      - mysql_master
+      - mysql_slave
+    networks:
+      mysql:
+      default:
+    volumes:
+      - ./config/haproxy.cnf:/usr/local/etc/haproxy/haproxy.cfg
+
+  mysql_master:
+    image: mariadb:10.7
+    restart: always
+    depends_on:
+      - mysql_slave
+    networks:
+      default:
+#    ports:
+#      - 3306:3306
+    volumes:
+      - mysql_master:/var/lib/mysql
+      - ./config/master.cnf:/etc/mysql/conf.d/custom.cnf
+    environment:
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+
+  mysql_slave:
+    image: mariadb:10.7
+    restart: always
+    networks:
+      default:
+#    ports:
+#      - 3307:3306
+    volumes:
+      - mysql_slave:/var/lib/mysql
+      - ./config/slave.cnf:/etc/mysql/conf.d/custom.cnf
+    environment:
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+
+  phpmyadmin:
+    hostname: phpmyadmin.mysql
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    depends_on:
+      - mysql
+    networks:
+      mysql:
+      nginx:
+      default:
+    environment:
+      PMA_HOSTS: mysql
+#      PMA_HOSTS: mysql,mysql_master,mysql_slave
+      PMA_PORT: 3306
+#      PMA_ARBITRARY: 1
+    ports:
+      - 8080:80
+
+volumes:
+  mysql_master:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: $PWD/storage/mysql_master
+  mysql_slave:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: $PWD/storage/mysql_slave
+
+networks:
+  nginx:
+    external: true
+  mysql:
+    name: mysql

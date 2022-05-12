@@ -1,0 +1,4 @@
+[mariadbd]
+server-id=01
+log_bin=mysql-bin
+log_error=mysql-bin.err
