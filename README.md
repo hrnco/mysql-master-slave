@@ -1,4 +1,4 @@
-# mysql-master-slave
+# mysql-master-slave - docker and docker compose - all in one
 - mysql master
 - mysql slave
 - haproxy
